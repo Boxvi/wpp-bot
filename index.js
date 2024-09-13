@@ -18,11 +18,51 @@ client.on('qr', (qr) => {
 client.on('message', async (message) => {
     const messageBody = message.body.toLowerCase(); // Convertir el mensaje a minúsculas
 
-    if(messageBody.includes('hola')){
+    if (messageBody.includes('hola')) {
         message.reply('¡Hola, te habla Boris! En este momento no me encuentro disponible, pero dime ¿Qué te gustaría hacer?');
     }
 
-    
+    if (messageBody.includes('biblia')) {
+        message.reply('filipenses 4 10-13');
+    }
+
+    if (messageBody.includes('pasado')) {
+        message.reply('siempre nos acecha pero aprendemos de el');
+    }
+
+    if (messageBody.includes('jackie')) {
+        message.reply('amor no correspondido que le quiero tocar una teta');
+    }
+
+    if (messageBody.includes('dios')) {
+        message.reply('dios esta murido segun mi perpectiva');
+    }
+
+    if (messageBody.includes('genesis')) {
+        message.reply('aun siento que regresara pero viendolo bien esta muy promiscua y cuantos abortos aya practicado');
+    }
+
+    if (messageBody.includes('bryan')) {
+        message.reply('eres tu brow');
+
+    }
+
+    if (messageBody.includes('boris')) {
+        message.reply('soy yo 7w7');
+    }
+
+    if (messageBody.includes('sexo')) {
+        message.reply('vamos al cabaret');
+    }
+
+    if (messageBody.includes('chongo')) {
+        message.reply('vamos al cabaret');
+    }
+
+    if (messageBody.includes('putero')) {
+        message.reply('vamos al cabaret');
+    }
+
     if (message.body === 'ping') {
         message.reply('pong');
     }
