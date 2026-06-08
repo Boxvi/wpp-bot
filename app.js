@@ -1,99 +1,56 @@
-const { createBot, createProvider, createFlow, addKeyword } = require('@bot-whatsapp/bot')
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+const { cargarServicios } = require('./servicios');
+const { manejarMensaje } = require('./handlers');
 
-const QRPortalWeb = require('@bot-whatsapp/portal')
-const BaileysProvider = require('@bot-whatsapp/provider/baileys')
-const MockAdapter = require('@bot-whatsapp/database/mock')
+// ─── CLIENTE WHATSAPP ────────────────────────────────────────────────────────
+const client = new Client({
+    authStrategy: new LocalAuth({ clientId: 'bot-esoterismo' }),
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu'
+        ]
+    }
+});
 
+// ─── EVENTOS ─────────────────────────────────────────────────────────────────
+client.on('qr', (qr) => {
+    console.log('\n📱 Escanea este código QR con WhatsApp:\n');
+    qrcode.generate(qr, { small: true });
+});
 
-const flowPrincipal = addKeyword(['hola', 'ole', 'alo', 'holi', 'wasup'])
-    .addAnswer('!Hola que tal!, como estas...')
-    .addAnswer('Si  es algo urgente llamame')
-    .addAnswer('Por el momento me encuentro lejos del telefono, dime en que te puedo ayudar?')
-    
+client.on('authenticated', () => {
+    console.log('✅ Autenticado correctamente');
+});
 
-const flowVisto = addKeyword(['visto', 'vist'])
-    .addAnswer('eso es mentira y lo sabes aki ando ready')
-    .addAnswer('posiblemte tu me dejaste en visto')
+client.on('auth_failure', (msg) => {
+    console.error('❌ Error de autenticación:', msg);
+});
 
+client.on('ready', async () => {
+    console.log('🔮 Bot de Esoterismo listo y escuchando mensajes...');
+    await cargarServicios(); // Carga el Excel al iniciar
+});
 
-const main = async () => {
-    const adapterDB = new MockAdapter()
-    const adapterFlow = createFlow([flowPrincipal])
-    const adapterProvider = createProvider(BaileysProvider)
+client.on('message', async (msg) => {
+    // Ignorar mensajes de grupos y mensajes propios
+    if (msg.isGroupMsg || msg.fromMe) return;
+    await manejarMensaje(client, msg);
+});
 
-    createBot({
-        flow: adapterFlow,
-        provider: adapterProvider,
-        database: adapterDB,
-    })
+client.on('disconnected', (reason) => {
+    console.log('⚠️  Bot desconectado:', reason);
+    // Reintentar conexión automáticamente
+    setTimeout(() => client.initialize(), 5000);
+});
 
-    QRPortalWeb()
-}
-
-main()
-
-/*
-
-            '👉 *FULLSTACK* cotizar un proyecto completo conmigo',
-            '👉 *front-end*  para el frontal de tu aplicacion',
-            '👉 *back-end* para la parte trasera que tu aplicaccion',
-            '👉 *soporte TI* arreglo y mantenimiento de laptos, pc o impresoras',
-
-            ,
-        [
-            
-        ],
-        null,
-        null,
-        null,
-
-const flowSecundario = addKeyword(['2', 'siguiente']).addAnswer(['📄 Aquí tenemos el flujo secundario'])
-
-
-
-
-const flowDocs = addKeyword(['doc', 'documentacion', 'documentación']).addAnswer(
-    [
-        '📄 Aquí encontras las documentación recuerda que puedes mejorarla',
-        'https://bot-whatsapp.netlify.app/',
-        '\n*2* Para siguiente paso.',
-    ],
-    null,
-    null,
-    [flowSecundario]
-)
-
-const flowTuto = addKeyword(['tutorial', 'tuto']).addAnswer(
-    [
-        '🙌 Aquí encontras un ejemplo rapido',
-        'https://bot-whatsapp.netlify.app/docs/example/',
-        '\n*2* Para siguiente paso.',
-    ],
-    null,
-    null,
-    [flowSecundario]
-)
-
-const flowGracias = addKeyword(['gracias', 'grac']).addAnswer(
-    [
-        '🚀 Puedes aportar tu granito de arena a este proyecto',
-        '[*opencollective*] https://opencollective.com/bot-whatsapp',
-        '[*buymeacoffee*] https://www.buymeacoffee.com/leifermendez',
-        '[*patreon*] https://www.patreon.com/leifermendez',
-        '\n*2* Para siguiente paso.',
-    ],
-    null,
-    null,
-    [flowSecundario]
-)
-
-const flowDiscord = addKeyword(['discord']).addAnswer(
-    ['🤪 Únete al discord', 'https://link.codigoencasa.com/DISCORD', '\n*2* Para siguiente paso.'],
-    null,
-    null,
-    [flowSecundario]
-)
-
-
-            */
-           
+// ─── INICIAR ─────────────────────────────────────────────────────────────────
+console.log('🌙 Iniciando Bot de Esoterismo...');
+client.initialize();
